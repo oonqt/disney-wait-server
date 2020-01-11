@@ -1,12 +1,15 @@
 const app = require("express")();
 const Themeparks = require("themeparks");
+const cors = require("cors");
 const { rideModel } = require("./models");
 const { PORT } = require("./config.json");
 
 const DL_API = new Themeparks.Parks.DisneylandResortCaliforniaAdventure({ parkId: 330339 });
 const CA_API = new Themeparks.Parks.DisneylandResortCaliforniaAdventure({ forceCreate: true });
 
-app.get("/rideTimes", async (req, res) => {
+app.use(cors({ methods: ["GET"] }));
+
+app.get("/rideTimes", async (_, res) => {
     try {
         let waitTimesDL = await DL_API.GetWaitTimes();
         waitTimesDL = waitTimesDL.map(ride => {
