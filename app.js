@@ -25,7 +25,7 @@ app.get("/rideTimes", async (_, res) => {
             const aCompare = a.name.replace(/"/g, "");
             const bCompare = b.name.replace(/"/g, "");
 
-            return aCompare.localeCompare(bCompare.name);
+            return aCompare.localeCompare(bCompare);
         });
 
         res.json(times);
