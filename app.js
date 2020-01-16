@@ -21,7 +21,12 @@ app.get("/rideTimes", async (_, res) => {
             return rideModel(ride);
         });
 
-        const times = [...waitTimesDL, ...waitTimesCA].sort();
+        const times = [...waitTimesDL, ...waitTimesCA].sort((a, b) => { 
+            const aCompare = a.name.replace(/"/g, "");
+            const bCompare = b.name.replace(/"/g, "");
+
+            return aCompare.localeCompare(bCompare.name);
+        });
 
         res.json(times);
     } catch (error) {
