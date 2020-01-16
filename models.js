@@ -4,6 +4,6 @@ module.exports.rideModel = (ride) => {
         status: ride.status,
         location: ride.meta.area,
         waitTime: ride.waitTime,
-        fastPast: ride.fastPass
+        fastPass: ride.fastPass
     }
 }
