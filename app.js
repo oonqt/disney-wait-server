@@ -1,38 +1,53 @@
 const app = require("express")();
+const compression = require('compression');
 const Themeparks = require("themeparks");
 const cors = require("cors");
 const { rideModel } = require("./models");
 const { PORT } = require("./config.json");
 
 const CA_API = new Themeparks.Parks.DisneylandResortCaliforniaAdventure();
-const DL_API = new Themeparks.Parks.DisneylandResortMagicKingdom({ resortId: 80008297, parkId: 330339 });
+const DL_API = new Themeparks.Parks.DisneylandResortMagicKingdom({
+  resortId: 80008297,
+  parkId: 330339,
+});
 
-app.use(cors({ methods: ["GET"] }));
+app.use(cors({ origin: "*", methods: ["GET"] }));
+app.use(compression());
 
-app.get("/rideTimes", async (_, res) => {
-    try {
-        let waitTimesDL = await DL_API.GetWaitTimes();
-        waitTimesDL = waitTimesDL.map(ride => {
-            return rideModel(ride);
-        });
+app.get("/rideTimes", async (req, res) => {
+  try {
+    const park = req.query.park;
+    if (!park || typeof park !== 'string') return res.status(400).json({ msg: 'Invalid or missing park type' });
 
-        let waitTimesCA = await CA_API.GetWaitTimes();
-        waitTimesCA = waitTimesCA.map(ride => {
-            return rideModel(ride);
-        });
+    let waitTimes;
 
-        const times = [...waitTimesDL, ...waitTimesCA].sort((a, b) => { 
-            const aCompare = a.name.replace(/"/g, "");
-            const bCompare = b.name.replace(/"/g, "");
-
-            return aCompare.localeCompare(bCompare);
-        });
-
-        res.json(times);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Internal Server Error" });
+    switch (park.toLowerCase()) {
+      case "disneyland":
+        waitTimes = await DL_API.GetWaitTimes();
+        break;
+      case "californiaadventure":
+        waitTimes = await CA_API.GetWaitTimes();
+        break;
+      default:
+        return res.status(400).json({ msg: "Invalid park type" });
     }
+
+    // Retrieve only the properties needed to minimize bandwidth
+    waitTimes = waitTimes.map(ride => rideModel(ride));
+
+    // Sort alphabetically
+    waitTimes = waitTimes.sort((a, b) => {
+      const aCompare = a.name.replace(/"/g, "");
+      const bCompare = b.name.replace(/"/g, "");
+
+      return aCompare.localeCompare(bCompare);
+    });
+
+    res.json(waitTimes);
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
 });
 
 app.listen(PORT, () => console.log("Listening on:", PORT));
