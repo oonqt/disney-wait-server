@@ -1,17 +1,16 @@
 const app = require("express")();
 const compression = require('compression');
+const morgan = require('morgan');
 const Themeparks = require("themeparks");
 const cors = require("cors");
 const { rideModel, openingTimeModel } = require("./models");
 const { PORT } = require("./config.json");
 
 const CA_API = new Themeparks.Parks.DisneylandResortCaliforniaAdventure();
-const DL_API = new Themeparks.Parks.DisneylandResortMagicKingdom({
-  resortId: 80008297,
-  parkId: 330339,
-});
+const DL_API = new Themeparks.Parks.DisneylandResortMagicKingdom();
 
 app.use(cors({ origin: "*", methods: ["GET"] }));
+app.use(morgan('dev'));
 app.use(compression());
 
 app.get('/parks', async (req, res) => {
@@ -56,6 +55,35 @@ app.get("/rideTimes", async (req, res) => {
     });
 
     res.json(waitTimes);
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
+
+app.get('/rides/:rideId', async (req, res) => {
+  try {
+    const rideId = req.params.rideId;
+    const park = req.query.park;
+    if (!park || typeof park !== 'string') return res.status(400).json({ msg: 'Invalid or missing park type' });
+
+    let rides;
+
+    switch (park.toLowerCase()) {
+     case 'disneyland':
+        rides = await DL_API.GetWaitTimes();
+        break;
+      case 'california adventure':
+        rides = await CA_API.GetWaitTimes();
+        break;
+      default: 
+        return res.status(400).json({ msg: 'Invalid park' });
+    }
+
+    const ride = rides.find(ride => ride.id === rideId);
+    if (!ride) return res.status(404).json({ msg: 'Ride not found' });
+
+    res.json(ride);
   } catch (error) {
     console.error(error);
     res.sendStatus(500);

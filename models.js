@@ -1,9 +1,8 @@
 exports.rideModel = (ride) => ({
   name: ride.name,
+  id: ride.id,
   status: ride.status,
-  location: ride.meta.area,
   waitTime: ride.waitTime,
-  fastPass: ride.fastPass,
 });
 
 exports.openingTimeModel = (data, name) => {
