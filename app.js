@@ -37,14 +37,12 @@ app.get("/rideTimes", async (req, res) => {
       case "disneyland":
         waitTimes = await DL_API.GetWaitTimes();
         break;
-      case "californiaadventure":
+      case "california adventure":
         waitTimes = await CA_API.GetWaitTimes();
         break;
       default:
         return res.status(400).json({ msg: "Invalid park type" });
     }
-
-    console.log(waitTimes);
 
     // Retrieve only the properties needed to minimize bandwidth
     waitTimes = waitTimes.map(ride => rideModel(ride));
