@@ -2,7 +2,7 @@ const app = require("express")();
 const compression = require('compression');
 const Themeparks = require("themeparks");
 const cors = require("cors");
-const { rideModel } = require("./models");
+const { rideModel, openingTimeModel } = require("./models");
 const { PORT } = require("./config.json");
 
 const CA_API = new Themeparks.Parks.DisneylandResortCaliforniaAdventure();
@@ -13,6 +13,18 @@ const DL_API = new Themeparks.Parks.DisneylandResortMagicKingdom({
 
 app.use(cors({ origin: "*", methods: ["GET"] }));
 app.use(compression());
+
+app.get('/parks', async (req, res) => {
+  try {
+    const dlOpeningTime = (await DL_API.GetOpeningTimes())[0];
+    const caOpeningTime = (await CA_API.GetOpeningTimes())[0];
+    
+    res.json([openingTimeModel(dlOpeningTime, 'Disneyland'), openingTimeModel(caOpeningTime, 'California Adventure')]);
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
+});
 
 app.get("/rideTimes", async (req, res) => {
   try {
@@ -31,6 +43,8 @@ app.get("/rideTimes", async (req, res) => {
       default:
         return res.status(400).json({ msg: "Invalid park type" });
     }
+
+    console.log(waitTimes);
 
     // Retrieve only the properties needed to minimize bandwidth
     waitTimes = waitTimes.map(ride => rideModel(ride));

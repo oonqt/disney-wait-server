@@ -1023,7 +1023,7 @@ tar@^4:
     safe-buffer "^5.1.2"
     yallist "^3.0.3"
 
-themeparks@^5.1.31:
+themeparks@^5.1.47:
   version "5.1.47"
   resolved "https://registry.yarnpkg.com/themeparks/-/themeparks-5.1.47.tgz#8fdac873d06466dac38ab32350b269f43e7fa0aa"
   integrity sha512-EkdxGseq5YWtsxPtT66x+X/uEdVmhyQDW12oa7G/tPCntPTxR6FGhe86TpHwe8hPc9RsuukYj1T2JnE5ZgnsCQ==
