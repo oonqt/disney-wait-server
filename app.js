@@ -61,33 +61,4 @@ app.get("/rideTimes", async (req, res) => {
   }
 });
 
-app.get('/rides/:rideId', async (req, res) => {
-  try {
-    const rideId = req.params.rideId;
-    const park = req.query.park;
-    if (!park || typeof park !== 'string') return res.status(400).json({ msg: 'Invalid or missing park type' });
-
-    let rides;
-
-    switch (park.toLowerCase()) {
-     case 'disneyland':
-        rides = await DL_API.GetWaitTimes();
-        break;
-      case 'california adventure':
-        rides = await CA_API.GetWaitTimes();
-        break;
-      default: 
-        return res.status(400).json({ msg: 'Invalid park' });
-    }
-
-    const ride = rides.find(ride => ride.id === rideId);
-    if (!ride) return res.status(404).json({ msg: 'Ride not found' });
-
-    res.json(ride);
-  } catch (error) {
-    console.error(error);
-    res.sendStatus(500);
-  }
-});
-
 app.listen(PORT, () => console.log("Listening on:", PORT));
